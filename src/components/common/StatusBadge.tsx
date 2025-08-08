@@ -1,29 +1,64 @@
-import type React from "react";
+// src/components/common/StatusBadge.tsx
+/** @file Küçük durum rozetleri; 0/1/2 (Pasif/Aktif/Taslak) veya "online/offline/error" gibi sistem durumlarını görselleştirir. */
 
-interface StatusBadgeProps {
-  status: "active" | "inactive" | "warning" | "error";
-  label: string;
-}
+import clsx from "clsx";
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label }) => {
-  const getStatusStyles = () => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800";
-      case "warning":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-800";
+type StatusValue = 0 | 1 | 2 | "online" | "offline" | "error";
+
+/** Verilen duruma göre renk/tone seçip rozet basar. */
+export function StatusBadge({
+  value,
+  className
+}: {
+  value: StatusValue;
+  className?: string;
+}) {
+  let label: string;
+  let tone: string;
+
+  if (typeof value === "number") {
+    // Model / Boyut / Kriter / Gösterge durumları
+    label = value === 1 ? "Aktif" : value === 2 ? "Taslak" : "Pasif";
+    tone =
+      value === 1
+        ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30"
+        : value === 2
+        ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30"
+        : "bg-destructive/15 text-destructive border border-destructive/30";
+  } else {
+    // API & DB gibi sistem durumları
+    switch (value) {
+      case "online":
+        label = "Online";
+        tone =
+          "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30";
+        break;
+      case "offline":
+        label = "Offline";
+        tone =
+          "bg-destructive/15 text-destructive border border-destructive/30";
+        break;
       case "error":
-        return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-800";
+        label = "Hata";
+        tone =
+          "bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30";
+        break;
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-zinc-800 dark:text-gray-200 dark:border-zinc-700";
+        label = String(value);
+        tone = "bg-muted text-muted-foreground";
     }
-  };
+  }
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusStyles()}`}
+      className={clsx(
+        "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
+        "shadow-sm",
+        tone,
+        className
+      )}
     >
       {label}
     </span>
   );
-};
+}

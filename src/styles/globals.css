@@ -1,10 +1,12 @@
+/* src/styles/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* === Design tokens === */
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 98%;
     --foreground: 240 10% 3.9%;
 
     --muted: 240 4.8% 95.9%;
@@ -36,63 +38,76 @@
     --radius: 0.5rem;
 
     --chart-1: 12 76% 61%;
-
     --chart-2: 173 58% 39%;
-
     --chart-3: 197 37% 24%;
-
     --chart-4: 43 74% 66%;
-
     --chart-5: 27 87% 67%;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    /* Daha modern, yumuşak koyu gri-mavi */
+    --background: 222 15% 10%;          /* sayfa zemin */
     --foreground: 0 0% 98%;
-
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-
-    --card: 240 10% 3.9%;
+  
+    --card: 222 14% 14%;                /* kart yüzeyi */
     --card-foreground: 0 0% 98%;
-
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-
-    --secondary: 240 3.7% 15.9%;
+  
+    --popover: 222 14% 12%;
+    --popover-foreground: 0 0% 98%;
+  
+    --muted: 222 12% 17%;               /* list/legend/secondary yüzey */
+    --muted-foreground: 220 10% 70%;
+  
+    --secondary: 222 12% 16%;
     --secondary-foreground: 0 0% 98%;
-
-    --accent: 240 3.7% 15.9%;
+  
+    --accent: 222 14% 20%;              /* hover yüzeyi */
     --accent-foreground: 0 0% 98%;
-
-    --destructive: 0 62.8% 30.6%;
+  
+    --border: 222 14% 22%;
+    --input: 222 14% 22%;
+    --ring: 215 20% 65%;                /* focus halkası rengi */
+  
+    --primary: 210 100% 60%;            /* ana aksan (mavi) */
+    --primary-foreground: 0 0% 100%;
+  
+    --destructive: 0 63% 45%;
     --destructive-foreground: 0 0% 98%;
-
-    --ring: 240 4.9% 83.9%;
-
-    --chart-1: 220 70% 50%;
-
+  
+    /* Chart renkleri de daha canlı */
+    --chart-1: 220 70% 55%;
     --chart-2: 160 60% 45%;
-
     --chart-3: 30 80% 55%;
-
     --chart-4: 280 65% 60%;
-
     --chart-5: 340 75% 55%;
   }
+  
 }
 
+/* === Base reset & theme plumbing === */
 @layer base {
-  * {
-    @apply border-border;
-  }
+  /* border renklerini token'a bağla */
+  * { @apply border-border; }
+
+  /* Tema rengini tek kaynaktan ver */
   body {
     @apply bg-background text-foreground;
+    /* Native UI'ları temaya uydurur (scrollbar, input vs.) */
+    color-scheme: light;
+  }
+
+  /* dark modda native'leri de koyulaştır */
+  .dark body { color-scheme: dark; }
+
+  /* Seçim (selection) renkleri */
+  ::selection {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+  }
+
+  /* Daha belirgin erişilebilir odak halkası */
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring));
   }
 }

@@ -1,7 +1,5 @@
 // Tüm DTO ve tipleri tek merkezden dışa aktarmak için kullanılır
-export * from './Eslesme';
-export * from './EslesmeTree';
-
+export * from '../services/eslesmeService';
 // export * from './Boyut';
 // export * from './Model';
 // export * from './Kriter';

@@ -19,7 +19,10 @@
 
 
 import axios from 'axios'
-import { EslesmeFilterDto, EslesmeListDto } from '@/types';
+import type {
+  NavigationFilter as EslesmeFilterDto,
+  ModelNavigasyonDto as EslesmeListDto
+} from '@/services/eslesmeService';
 
 
 // API istekleri için ortak axios örneği (backend baseURL'i ve header ayarları)

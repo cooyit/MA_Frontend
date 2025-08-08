@@ -2,7 +2,7 @@
 import { Routes, Route } from "react-router-dom"
 import { Layout } from "./components/layout/Layout"
 import { Dashboard } from "./pages/dashboard/Dashboard"
-import Eslesme from "./pages/eslesme/Eslesme" // 🔥 buraya ekle
+import Eslesme from "./pages/eslesme/Eslesme" //  buraya ekle
 
 function App() {
   return (

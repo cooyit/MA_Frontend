@@ -1,108 +1,186 @@
-"use client"
+// src/components/eslesme/EslesmeSearchFilter.tsx
+"use client";
 
-import type React from "react"
+import * as React from "react";
+import { SmartTextSearch } from "@/components/eslesme/SmartTextSearch";
+import { Button } from "@/components/ui/button";
+import { DilMultiSelect } from "@/components/common/DilMultiSelect";
+import { DurumMultiSelect, type Durum } from "@/components/common/DurumMultiSelect";
+import { FilterChips, type Chip } from "@/components/common/FilterChips";
+import type { NavigationFilter } from "@/services/eslesmeService";
+import { RefreshCw, X } from "lucide-react";
 
-import { Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+/* ---------- EnterAddField'i DOSYA SEVİYESİNDE tanımla ---------- */
+type EnterAddFieldProps = {
+  value: string;
+  setValue: (v: string) => void;
+  hints?: string[];
+  placeholder: string;
+  onAdd: (v: string) => void;
+};
 
-interface EslesmeSearchFilterProps {
-  onSearch?: (filters: any) => void
-}
+const EnterAddField = React.memo(function EnterAddField({
+  value, setValue, hints = [], placeholder, onAdd,
+}: EnterAddFieldProps) {
+  return (
+    <div
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const v = value.trim();
+          if (v) { onAdd(v); setValue(""); }
+        }
+      }}
+    >
+      <SmartTextSearch
+        value={value}
+        onChange={setValue}
+        hints={hints}
+        placeholder={placeholder}
+        minChars={1}
+        onPick={(v) => { onAdd(v); setValue(""); }}
+      />
+    </div>
+  );
+});
 
-export function EslesmeSearchFilter({ onSearch }: EslesmeSearchFilterProps) {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Form verilerini topla ve onSearch'e gönder
-    onSearch?.({})
-  }
+/* ------------------------- Ana bileşen ------------------------- */
+
+export type HintPool = {
+  model?: string[];
+  boyut?: string[];
+  kriter?: string[];
+  gosterge?: string[];
+};
+
+export function EslesmeSearchFilter({
+  onSearch, hints, resetKey = 0, onRefresh,
+}: {
+  onSearch: (f: NavigationFilter) => void;
+  hints?: HintPool;
+  resetKey?: number;
+  onRefresh?: () => void;         // <-- yeni
+}) {
+  // Tekli inputlar
+  const [modelInput, setModelInput] = React.useState("");
+  const [boyutInput, setBoyutInput] = React.useState("");
+  const [kriterInput, setKriterInput] = React.useState("");
+  const [gostergeInput, setGostergeInput] = React.useState("");
+
+  // Çoklu terimler (chip)
+  const [modelKelimeler, setModelKelimeler] = React.useState<string[]>([]);
+  const [boyutKelimeler, setBoyutKelimeler] = React.useState<string[]>([]);
+  const [kriterKelimeler, setKriterKelimeler] = React.useState<string[]>([]);
+  const [gostergeKelimeler, setGostergeKelimeler] = React.useState<string[]>([]);
+
+  // Çoklu seçimler
+  const [dilAdlari, setDilAdlari] = React.useState<string[]>([]);
+  const [aktifler, setAktifler] = React.useState<Durum[]>([]);
+
+  const addTerm = React.useCallback(
+    (val: string, setList: React.Dispatch<React.SetStateAction<string[]>>) => {
+      const v = val.trim();
+      if (!v) return;
+      setList((arr) => (arr.includes(v) ? arr : [...arr, v]));
+    },
+    []
+  );
+
+  // payload
+  const payload = React.useMemo<NavigationFilter>(() => {
+    const aktifNums = (aktifler ?? []).map(Number).filter((x) => Number.isFinite(x));
+    return {
+      dilAdlari: dilAdlari.length ? dilAdlari : undefined,
+      aktifler : aktifNums.length ? aktifNums : undefined,
+      modelKelimeler   : modelKelimeler.length ? modelKelimeler : undefined,
+      boyutKelimeler   : boyutKelimeler.length ? boyutKelimeler : undefined,
+      kriterKelimeler  : kriterKelimeler.length ? kriterKelimeler : undefined,
+      gostergeKelimeler: gostergeKelimeler.length ? gostergeKelimeler : undefined,
+    };
+  }, [dilAdlari, aktifler, modelKelimeler, boyutKelimeler, kriterKelimeler, gostergeKelimeler]);
+
+  // tek effect ile gönder
+  const payloadKey = React.useMemo(() => JSON.stringify(payload), [payload]);
+  React.useEffect(() => {
+    onSearch(payload);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [payloadKey]);
+
+  // dış reset
+  const resetOnly = React.useCallback(() => {
+    setModelInput(""); setBoyutInput(""); setKriterInput(""); setGostergeInput("");
+    setModelKelimeler([]); setBoyutKelimeler([]); setKriterKelimeler([]); setGostergeKelimeler([]);
+    setDilAdlari([]); setAktifler([]);
+  }, []);
+
+  React.useEffect(() => { resetOnly(); }, [resetKey, resetOnly]);
+
+  const clearAll = React.useCallback(() => { resetOnly(); }, [resetOnly]);
+
+  const chips: Chip[] = [
+    ...modelKelimeler.map((t) => ({ id:`m:${t}`, label:`model: "${t}"`, onRemove:()=>setModelKelimeler(a=>a.filter(x=>x!==t)) })),
+    ...boyutKelimeler.map((t) => ({ id:`b:${t}`, label:`boyut: "${t}"`, onRemove:()=>setBoyutKelimeler(a=>a.filter(x=>x!==t)) })),
+    ...kriterKelimeler.map((t) => ({ id:`k:${t}`, label:`kriter: "${t}"`, onRemove:()=>setKriterKelimeler(a=>a.filter(x=>x!==t)) })),
+    ...gostergeKelimeler.map((t) => ({ id:`g:${t}`, label:`gösterge: "${t}"`, onRemove:()=>setGostergeKelimeler(a=>a.filter(x=>x!==t)) })),
+    ...dilAdlari.map((d) => ({ id:`dil:${d}`, label:`dil: ${d}`, onRemove:()=>setDilAdlari(arr=>arr.filter(x=>x!==d)) })),
+    ...aktifler.map((a) => ({ id:`aktif:${a}`, label:`durum: ${a===1 ? "Aktif" : a===0 ? "Pasif" : "Taslak"}`, onRemove:()=>setAktifler(arr=>arr.filter(x=>x!==a)) })),
+  ];
 
   return (
-    <Card className="bg-slate-800 border-slate-700">
-      <CardContent className="p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">Model</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-                <Input
-                  placeholder="Model Ara"
-                  className="pl-10 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
-                />
-              </div>
-            </div>
+    <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <EnterAddField
+          value={modelInput}
+          setValue={setModelInput}
+          hints={hints?.model}
+          placeholder="Model Ara (Enter ile ekle)"
+          onAdd={(v)=>addTerm(v, setModelKelimeler)}
+        />
+        
+        <EnterAddField
+          value={boyutInput}
+          setValue={setBoyutInput}
+          hints={hints?.boyut}
+          placeholder="Boyut Ara (Enter ile ekle)"
+          onAdd={(v)=>addTerm(v, setBoyutKelimeler)}
+        />
+        <EnterAddField
+          value={kriterInput}
+          setValue={setKriterInput}
+          hints={hints?.kriter}
+          placeholder="Kriter Ara (Enter ile ekle)"
+          onAdd={(v)=>addTerm(v, setKriterKelimeler)}
+        />
+        <EnterAddField
+          value={gostergeInput}
+          setValue={setGostergeInput}
+          hints={hints?.gosterge}
+          placeholder="Gösterge Ara (Enter ile ekle)"
+          onAdd={(v)=>addTerm(v, setGostergeKelimeler)}
+        />
+      </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">Kriter</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-                <Input
-                  placeholder="Kriter Ara"
-                  className="pl-10 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
-                />
-              </div>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <DilMultiSelect value={dilAdlari} onChange={setDilAdlari} />
+        <DurumMultiSelect value={aktifler} onChange={setAktifler} />
+        <div className="flex items-center gap-2 md:col-span-2 justify-end">
+          <Button variant="outline" onClick={clearAll}>
+            <X className="mr-2 h-4 w-4" />
+            Temizle
+          </Button>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">Boyut</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-                <Input
-                  placeholder="Boyut Ara"
-                  className="pl-10 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">Gösterge</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-                <Input
-                  placeholder="Gösterge Ara"
-                  className="pl-10 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">Dil</label>
-              <Select defaultValue="tr">
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-700 border-slate-600">
-                  <SelectItem value="tr">Türkçe</SelectItem>
-                  <SelectItem value="en">English</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300">Durum</label>
-              <Select defaultValue="all">
-                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-700 border-slate-600">
-                  <SelectItem value="all">Tümü</SelectItem>
-                  <SelectItem value="active">Aktif</SelectItem>
-                  <SelectItem value="passive">Pasif</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex justify-center">
-            <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8">
-              Listele
+          {onRefresh && (
+            <Button variant="outline" onClick={onRefresh}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Yenile
             </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
-  )
+          )}
+
+          <Button onClick={() => onSearch(payload)}>Listele</Button>
+        </div>
+      </div>
+
+      <FilterChips chips={chips} />
+    </div>
+  );
 }
