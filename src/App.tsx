@@ -2,7 +2,8 @@
 import { Routes, Route } from "react-router-dom"
 import { Layout } from "./components/layout/Layout"
 import { Dashboard } from "./pages/dashboard/Dashboard"
-import Eslesme from "./pages/eslesme/Eslesme" //  buraya ekle
+import Eslesme from "./pages/eslesme/Eslesme" 
+import BoyutHome from "@/components/boyut/BoyutHome";
 
 function App() {
   return (
@@ -10,7 +11,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/eslesme" element={<Eslesme />} /> {/* ✅ burası eklendi */}
-        <Route path="/modeller" element={<div className="p-6">Modeller sayfası yakında...</div>} />
+        <Route path="/boyutlar" element={<BoyutHome />} />
         <Route path="/kriterler" element={<div className="p-6">Kriterler sayfası yakında...</div>} />
         <Route path="/gostergeler" element={<div className="p-6">Göstergeler sayfası yakında...</div>} />
         <Route path="/diller" element={<div className="p-6">Diller sayfası yakında...</div>} />

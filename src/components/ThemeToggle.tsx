@@ -3,7 +3,7 @@
 import { useTheme } from "@/theme/ThemeProvider";
 import { Sun, Moon} from "lucide-react";
 export default function ThemeToggle() {
-  const { theme, setTheme, isDark } = useTheme();
+  const {  setTheme, isDark } = useTheme();
   return (
     <div className="inline-flex items-center gap-2">
       <button

@@ -1,49 +1,44 @@
-"use client"
+// src/components/common/MenuList.tsx
+"use client";
 
-import type React from "react"
-import { ChevronRight } from "lucide-react"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-interface MenuItem {
-  label: string
-  count: number
-  onClick?: () => void
-}
+type MenuItem = {
+  label: string;
+  count?: number;
+  onClick?: () => void | Promise<void>;
+};
 
-interface MenuListProps {
-  items: MenuItem[]
-}
+type Props = {
+  items: MenuItem[];
+  className?: string;
+};
 
-export const MenuList: React.FC<MenuListProps> = ({ items }) => {
+const MenuList: React.FC<Props> = ({ items, className }) => {
   return (
-    <ul className="space-y-2">
-      {items.map((item, index) => {
-        const isClickable = typeof item.onClick === "function"
-
-        return (
-            <li
-            key={index}
-            onClick={item.onClick}
-            className={`
-              group flex items-center justify-between px-4 py-2 rounded-md
-              ${isClickable ? "hover:bg-blue-950 dark:hover:bg-blue-900 cursor-pointer" : "cursor-default"}
-              transition
-            `}
+    <ul className={cn("space-y-2", className)}>
+      {items.map((it) => (
+        <li key={it.label}>
+          <button
+            type="button"
+            onClick={it.onClick}
+            className={cn(
+              "w-full rounded-md border border-border bg-muted/40 px-3 py-2",
+              "flex items-center justify-between text-left hover:bg-muted transition-colors"
+            )}
           >
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-700 dark:text-gray-200 group-hover:text-white">
-                {item.label}
+            <span className="text-sm font-medium">{it.label}</span>
+            {typeof it.count === "number" && (
+              <span className="rounded-full bg-background px-2 py-0.5 text-xs text-muted-foreground border border-border">
+                {it.count}
               </span>
-              {isClickable && (
-                <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-white" />
-              )}
-            </div>
-            <span className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 px-2 py-1 rounded-full">
-              {item.count}
-            </span>
-          </li>
-          
-        )
-      })}
+            )}
+          </button>
+        </li>
+      ))}
     </ul>
-  )
-}
+  );
+};
+
+export default MenuList;

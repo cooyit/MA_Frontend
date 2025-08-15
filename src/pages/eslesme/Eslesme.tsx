@@ -231,7 +231,7 @@ function normalizeToTree(models: ModelNavigasyonDto[]) {
 /* ----------------- Sayfa ----------------- */
 export default function EslesmePage() {
   const [filter, setFilter] = useState<NavigationFilter>({})
-  const [resetKey] = useState(0)
+  const [_resetKey] = useState(0)
   const { data, loading, error, refresh } = useEslesmeNavigation(filter)
 
   // ÖNEMLİ: kimliği sabit olsun
@@ -242,34 +242,64 @@ export default function EslesmePage() {
 
 
   const hints = useMemo(() => {
-    const set = <T,>(arr: T[]) => Array.from(new Set(arr))
-    const models = set((data ?? []).map((m: any) => m.modelAdi).filter(Boolean))
+    const set = <T,>(arr: T[]) => Array.from(new Set(arr));
+  
+    // isim anahtarları farklı (camelCase/PascalCase/snake_case) gelebileceği için güvenli isim seçici
+    const nameOf = (obj: any, keys: string[]) => {
+      for (const k of keys) {
+        const v = obj?.[k];
+        if (typeof v === "string" && v.trim().length > 0) return v.trim();
+      }
+      return "";
+    };
+  
+    const models = set(
+      (data ?? [])
+        .map((m: any) => nameOf(m, ["modelAdi", "ModelAdi"]))
+        .filter((s) => s.length > 0)
+    );
+  
     const boyutlar = set(
       (data ?? [])
-        .flatMap((m: any) => (m.boyutlar ?? []).map((b: any) => b.boyutAdi))
-        .filter(Boolean)
-    )
+        .flatMap((m: any) =>
+          (m.boyutlar ?? []).map((b: any) => nameOf(b, ["boyutAdi", "BoyutAdi"]))
+        )
+        .filter((s) => s.length > 0)
+    );
+  
     const kriterler = set(
       (data ?? [])
         .flatMap((m: any) =>
-          (m.boyutlar ?? []).flatMap((b: any) => (b.kriterler ?? []).map((k: any) => k.kriterAdi))
+          (m.boyutlar ?? []).flatMap((b: any) =>
+            (b.kriterler ?? []).map((k: any) =>
+              nameOf(k, ["kriterAdi", "KriterAdi", "kriter_adi"])
+            )
+          )
         )
-        .filter(Boolean)
-    )
+        .filter((s) => s.length > 0)
+    );
+  
     const gostergeler = set(
       (data ?? [])
         .flatMap((m: any) =>
           (m.boyutlar ?? []).flatMap((b: any) => [
-            ...(b.gostergeler ?? []).map((g: any) => g.gostergeAdi),
+            ...(b.gostergeler ?? []).map((g: any) =>
+              nameOf(g, ["gostergeAdi", "GostergeAdi"])
+            ),
             ...(b.kriterler ?? []).flatMap((k: any) =>
-              (k.gostergeler ?? []).map((g: any) => g.gostergeAdi)
+              (k.gostergeler ?? []).map((g: any) =>
+                nameOf(g, ["gostergeAdi", "GostergeAdi"])
+              )
             ),
           ])
         )
-        .filter(Boolean)
-    )
-    return { model: models, boyut: boyutlar, kriter: kriterler, gosterge: gostergeler }
-  }, [data])
+        .filter((s) => s.length > 0)
+    );
+    
+    
+    return { model: models, boyut: boyutlar, kriter: kriterler, gosterge: gostergeler };
+  }, [data]);
+  
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors p-6">

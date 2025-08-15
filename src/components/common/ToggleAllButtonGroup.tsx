@@ -1,37 +1,78 @@
-// components/common/ToggleAllButtonGroup.tsx
+//src/components/common/ToggleAllButtonGroup.tsx
+"use client";
+
 /**
- * ToggleAllButtonGroup - Tümünü Aç / Tümünü Kapat buton bileşeni
+ * ToggleAllButtonGroup - Tümünü Aç / Tümünü Kapat buton grubu
  *
- * Açıklama:
  * - Ağaç veya liste yapısında tüm satırları açmak/kapatmak için kullanılır.
  * - Light/Dark tema uyumludur.
- * - Butonlara dışarıdan callback atanabilir.
+ * - Dışarıdan callback atanabilir.
  */
 
-import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import React from 'react';
+import * as React from "react";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ToggleAllButtonGroupProps {
   onExpandAll: () => void;
   onCollapseAll: () => void;
   className?: string;
+  /** Hedef bölgenin id'si (a11y için) */
+  controlsId?: string;
+  /** Buton boyutu (shadcn) */
+  size?: "default" | "sm" | "lg" | "icon";
+  /** Buton variant'ı (shadcn) */
+  variant?: "default" | "secondary" | "destructive" | "outline" | "ghost" | "link";
+  /** Her iki butonu da devre dışı bırak */
+  disabled?: boolean;
+  /** Etiketleri özelleştirme */
+  labels?: {
+    collapse?: string; // Tümünü Kapat
+    expand?: string;   // Tümünü Aç
+  };
+  /** Sadece ikon göster (compact mod) */
+  iconOnly?: boolean;
 }
 
 export const ToggleAllButtonGroup: React.FC<ToggleAllButtonGroupProps> = ({
   onExpandAll,
   onCollapseAll,
-  className = '',
+  className = "",
+  controlsId,
+  size = "default",
+  variant = "secondary",
+  disabled = false,
+  labels = { collapse: "Tümünü Kapat", expand: "Tümünü Aç" },
+  iconOnly = false,
 }) => {
   return (
-    <div className={`flex gap-2 ${className}`}>
-      <Button variant="secondary" onClick={onCollapseAll}>
-        <ChevronUp className="w-4 h-4 mr-2" />
-        Tümünü Kapat
+    <div className={cn("flex gap-2", className)} role="group" aria-label="Toplu aç/kapat">
+      <Button
+        type="button"
+        variant={variant}
+        size={size}
+        onClick={onCollapseAll}
+        aria-controls={controlsId}
+        aria-label={labels.collapse}
+        disabled={disabled}
+        title={labels.collapse}
+      >
+        <ChevronUp className={cn("mr-2 h-4 w-4", iconOnly && "mr-0")} aria-hidden="true" />
+        {!iconOnly && labels.collapse}
       </Button>
-      <Button variant="secondary" onClick={onExpandAll}>
-        <ChevronDown className="w-4 h-4 mr-2" />
-        Tümünü Aç
+      <Button
+        type="button"
+        variant={variant}
+        size={size}
+        onClick={onExpandAll}
+        aria-controls={controlsId}
+        aria-label={labels.expand}
+        disabled={disabled}
+        title={labels.expand}
+      >
+        <ChevronDown className={cn("mr-2 h-4 w-4", iconOnly && "mr-0")} aria-hidden="true" />
+        {!iconOnly && labels.expand}
       </Button>
     </div>
   );

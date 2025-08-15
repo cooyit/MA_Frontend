@@ -1,5 +1,6 @@
 // src/components/common/StatPill.tsx
 import clsx from "clsx";
+import * as React from "react";
 
 const TONES = {
   neutral: "bg-secondary text-secondary-foreground border border-border/60",
@@ -11,30 +12,35 @@ const TONES = {
 } as const;
 
 export type Tone = keyof typeof TONES;
-type Size = "xs" | "md";
+type Size = "xs" | "sm" | "md"; // sm eklendi
 
 export function StatPill({
   children,
   tone = "neutral",
-  size = "md",           // NEW
+  size = "md",
   title,
   className,
+  "aria-label": ariaLabel,
 }: {
   children: React.ReactNode;
   tone?: Tone;
-  size?: Size;          // NEW
+  size?: Size;
   title?: string;
   className?: string;
+  "aria-label"?: string;
 }) {
   const toneClass = TONES[tone];
   const sizeClass =
     size === "xs"
-      ? "px-1.5 py-0.5 text-[10px]"     // NEW (küçük)
+      ? "px-1.5 py-0.5 text-[10px]"
+      : size === "sm"
+      ? "px-2 py-0.5 text-[11px]"
       : "px-3 py-1 text-xs";
 
   return (
     <span
       title={title}
+      aria-label={ariaLabel}
       className={clsx(
         "inline-flex items-center rounded-full font-medium shadow-sm",
         "backdrop-blur-[1px]",

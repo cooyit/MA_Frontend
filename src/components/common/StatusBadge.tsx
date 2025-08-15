@@ -2,63 +2,84 @@
 /** @file Küçük durum rozetleri; 0/1/2 (Pasif/Aktif/Taslak) veya "online/offline/error" gibi sistem durumlarını görselleştirir. */
 
 import clsx from "clsx";
+import { StatPill, type Tone } from "./StatPill";
+import { toStatusNumber, statusLabel } from "@/lib/status";
 
-type StatusValue = 0 | 1 | 2 | "online" | "offline" | "error";
+type SystemStatus = "online" | "offline" | "error";
+type StatusValue = number | SystemStatus | unknown;
 
-/** Verilen duruma göre renk/tone seçip rozet basar. */
 export function StatusBadge({
   value,
-  className
+  className,
+  size = "xs",
+  showDot = false,
+  labelOverride,
+  title,
+  "aria-label": ariaLabel,
 }: {
   value: StatusValue;
   className?: string;
+  size?: "xs" | "sm" | "md";
+  /** Sol tarafta renkli bir nokta göster */
+  showDot?: boolean;
+  /** Etiketi zorla/override et */
+  labelOverride?: string;
+  title?: string;
+  "aria-label"?: string;
 }) {
+  let tone: Tone = "muted";
   let label: string;
-  let tone: string;
 
-  if (typeof value === "number") {
-    // Model / Boyut / Kriter / Gösterge durumları
-    label = value === 1 ? "Aktif" : value === 2 ? "Taslak" : "Pasif";
-    tone =
-      value === 1
-        ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30"
-        : value === 2
-        ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30"
-        : "bg-destructive/15 text-destructive border border-destructive/30";
+  if (typeof value === "number" || value === 0 || value === 1 || value === 2) {
+    const n = toStatusNumber(value);
+    label = statusLabel(n);
+    tone = n === 1 ? "success" : n === 2 ? "warning" : "danger";
   } else {
-    // API & DB gibi sistem durumları
-    switch (value) {
-      case "online":
-        label = "Online";
-        tone =
-          "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30";
-        break;
-      case "offline":
-        label = "Offline";
-        tone =
-          "bg-destructive/15 text-destructive border border-destructive/30";
-        break;
-      case "error":
-        label = "Hata";
-        tone =
-          "bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30";
-        break;
-      default:
-        label = String(value);
-        tone = "bg-muted text-muted-foreground";
+    const s = String(value ?? "").toLowerCase();
+    if (s === "online") {
+      tone = "success";
+      label = "Online";
+    } else if (s === "offline") {
+      tone = "danger";
+      label = "Offline";
+    } else if (s === "error") {
+      tone = "warning";
+      label = "Hata";
+    } else if (s) {
+      // bilinmeyen string: olduğu gibi yaz
+      tone = "muted";
+      label = String(value);
+    } else {
+      tone = "muted";
+      label = "—";
     }
   }
 
-  return (
-    <span
-      className={clsx(
-        "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
-        "shadow-sm",
-        tone,
-        className
+  const content = (
+    <>
+      {showDot && (
+        <span
+          aria-hidden="true"
+          className={clsx(
+            "mr-1 h-1.5 w-1.5 shrink-0 rounded-full",
+            // dot rengi: currentColor ile görünür; ek sınıfa gerek yok
+            "bg-current"
+          )}
+        />
       )}
+      <span className="truncate">{labelOverride ?? label}</span>
+    </>
+  );
+
+  return (
+    <StatPill
+      tone={tone}
+      size={size}
+      className={className}
+      title={title ?? (labelOverride ?? label)}
+      aria-label={ariaLabel ?? (labelOverride ?? label)}
     >
-      {label}
-    </span>
+      {content}
+    </StatPill>
   );
 }
