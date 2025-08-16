@@ -6,7 +6,7 @@ export interface KriterTreeApi {
   kriterId: number;
   kriterAdi: string;
   kriterAlias: string;
-  aktif: string;
+  aktif: number | null;
   dilAdi: string;
   olusturmaZamani: string;
   translations: KriterTreeApi[];

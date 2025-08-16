@@ -8,6 +8,7 @@ import ModelTable, { type ModelRow, type ModelChild } from "./ModelTable";
 import ModelDetailTable, { type ModelDetailSummary } from "./ModelDetailTable";
 import { fetchModels, fetchModelDetails } from "@/services/modelService";
 import { mapApiToRow, type ModelRowUI } from "./normalize";
+import { usePageTitle } from "@/contexts/PageTitleContext";
 import { toStatusNumber } from "@/lib/status";
 
 // tarih kısayolu
@@ -15,9 +16,15 @@ const fmt = (iso?: string) => (iso ? new Date(iso).toLocaleDateString("tr-TR") :
 
 export default function ModelHome() {
   const [search, setSearch] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState<"all" | "active" | "draft" | "passive">("all");
+  const [statusFilter, setStatusFilter] = React.useState<"all" | "active" | "draft" | "passive" | "multiple">("all");
   const [languageFilter, setLanguageFilter] = React.useState<string | "all" | "multiple">("all");
   const [selectedLanguages, setSelectedLanguages] = React.useState<string[]>([]);
+  const { setPageTitle } = usePageTitle();
+
+  // Sayfa başlığını ayarla
+  React.useEffect(() => {
+    setPageTitle('Modeller');
+  }, [setPageTitle]);
 
   const [rows, setRows] = React.useState<ModelRow[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -200,7 +207,7 @@ function applyFilters(
   items: ModelRowUI[],
   params: {
     search: string;
-    statusFilter: "all" | "active" | "draft" | "passive";
+    statusFilter: "all" | "active" | "draft" | "passive" | "multiple";
     languageFilter: string | "all" | "multiple";
     selectedLanguages: string[];
   }

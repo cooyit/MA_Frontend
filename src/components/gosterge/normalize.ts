@@ -45,7 +45,7 @@ export function mapTreeApiToRow(api: GostergeTreeApi): GostergeRowUI {
     name: api.gostergeAdi,
     shortName: api.gostergeAllias,
     language: api.dilAdi,
-    status: 1, // Göstergeler için varsayılan aktif
+    status: (api.aktif ?? 0) as StatusNum,
     date: api.olusturmaZamani,
     cevapTuruAdlari: api.cevapTuruAdlari || [],
     children: api.children?.map(mapChildApiToUI),
@@ -58,7 +58,7 @@ export function mapChildApiToUI(api: GostergeTreeApi): GostergeChildUI {
     name: api.gostergeAdi,
     shortName: api.gostergeAllias,
     language: api.dilAdi,
-    status: 1, // Göstergeler için varsayılan aktif
+    status: (api.aktif ?? 0) as StatusNum,
     date: api.olusturmaZamani,
     cevapTuruAdlari: api.cevapTuruAdlari || [],
   };

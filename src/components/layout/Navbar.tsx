@@ -2,15 +2,18 @@ import React from "react"
 import { Search, Globe, LucideSettings } from "lucide-react"
 import logo from "@/assets/logo.png"
 import ThemeToggle from "@/components/ThemeToggle"
+import { usePageTitle } from "@/contexts/PageTitleContext"
 
 export const Navbar: React.FC = () => {
+  const { pageTitle } = usePageTitle();
+  
   return (
     <nav className="bg-background border-b border-border px-6 py-4 transition-colors">
       <div className="flex items-center justify-between">
         {/* Logo & title */}
         <div className="flex items-center gap-3">
           <img src={logo} alt="Logo" className="h-8 w-auto" />
-          <h1 className="text-xl font-semibold">Hastane 4.0</h1>
+          <h1 className="text-xl font-semibold">{pageTitle}</h1>
         </div>
 
         {/* Search */}

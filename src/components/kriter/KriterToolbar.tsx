@@ -15,6 +15,7 @@ type Props = {
   onSearchChange: (v: string) => void;
   statusFilter: StatusFilter;
   onStatusFilterChange: (v: StatusFilter) => void;
+  onSelectedStatusesChange?: (statuses: number[]) => void;
   languageFilter: string | "all";
   onLanguageFilterChange: (v: string | "all") => void;
   selectedLanguages?: string[];
@@ -27,6 +28,7 @@ type Props = {
 export default function KriterToolbar({
   onSearchChange,
   onStatusFilterChange,
+  onSelectedStatusesChange,
   onLanguageFilterChange,
   onSelectedLanguagesChange,
   onCreate,
@@ -70,14 +72,17 @@ export default function KriterToolbar({
   React.useEffect(() => {
     if (aktifler.length === 0) {
       onStatusFilterChange("all");
+      onSelectedStatusesChange?.([]);
     } else if (aktifler.length === 1) {
       const status = aktifler[0] === 1 ? "active" : aktifler[0] === 2 ? "draft" : "passive";
       onStatusFilterChange(status);
+      onSelectedStatusesChange?.([aktifler[0]]);
     } else {
-      const status = aktifler[0] === 1 ? "active" : aktifler[0] === 2 ? "draft" : "passive";
-      onStatusFilterChange(status);
+      // Birden fazla durum seçildiyse "multiple" kullan
+      onStatusFilterChange("multiple");
+      onSelectedStatusesChange?.(aktifler);
     }
-  }, [aktifler, onStatusFilterChange]);
+  }, [aktifler, onStatusFilterChange, onSelectedStatusesChange]);
 
   // Arama terimlerini birleştir
   React.useEffect(() => {

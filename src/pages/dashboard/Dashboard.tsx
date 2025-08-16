@@ -1,12 +1,20 @@
-import type React from "react";
+import React from "react";
 import { BarChart3, Database, TrendingUp, Users, Settings, Activity } from "lucide-react";
 import AppCard from "@/components/common/AppCard";
 import MenuList from "@/components/common/MenuList";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { useNavigate } from "react-router-dom";
+import { usePageTitle } from "@/contexts/PageTitleContext";
+import { Helmet } from "react-helmet-async";
 
 export const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { setPageTitle } = usePageTitle();
+
+  // Sayfa başlığını ayarla
+  React.useEffect(() => {
+    setPageTitle('Hastane 4.0');
+  }, [setPageTitle]);
 
   const measurementItems = [
     { label: "Modeller", count: 12, onClick: () => navigate("/modeller") },
@@ -43,7 +51,11 @@ export const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="container mx-auto min-h-screen bg-background px-4 py-6 text-foreground sm:px-6 lg:px-8">
+    <>
+      <Helmet>
+        <title>Hastane 4.0</title>
+      </Helmet>
+      <div className="container mx-auto min-h-screen bg-background px-4 py-6 text-foreground sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-bold lg:text-4xl">Hoş Geldiniz!</h1>
         <p className="max-w-prose text-muted-foreground">
@@ -109,8 +121,9 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
         </AppCard>
+              </div>
       </div>
-    </div>
+    </>
   );
 };
 

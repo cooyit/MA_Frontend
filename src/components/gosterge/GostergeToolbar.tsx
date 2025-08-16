@@ -13,6 +13,7 @@ import type { StatusFilter } from "@/lib/status";
 type Props = {
   onSearchChange: (v: string) => void;
   onStatusFilterChange: (v: StatusFilter) => void;
+  onSelectedStatusesChange?: (statuses: number[]) => void;
   onLanguageFilterChange: (v: string | "all") => void;
   onSelectedLanguagesChange?: (languages: string[]) => void;
   onCreate: () => void;
@@ -23,6 +24,7 @@ type Props = {
 export default function GostergeToolbar({
   onSearchChange,
   onStatusFilterChange,
+  onSelectedStatusesChange,
   onLanguageFilterChange,
   onSelectedLanguagesChange,
   onCreate,
@@ -66,14 +68,17 @@ export default function GostergeToolbar({
   React.useEffect(() => {
     if (aktifler.length === 0) {
       onStatusFilterChange("all");
+      onSelectedStatusesChange?.([]);
     } else if (aktifler.length === 1) {
       const status = aktifler[0] === 1 ? "active" : aktifler[0] === 2 ? "draft" : "passive";
       onStatusFilterChange(status);
+      onSelectedStatusesChange?.([aktifler[0]]);
     } else {
-      const status = aktifler[0] === 1 ? "active" : aktifler[0] === 2 ? "draft" : "passive";
-      onStatusFilterChange(status);
+      // Birden fazla durum seçildiyse "multiple" kullan
+      onStatusFilterChange("multiple");
+      onSelectedStatusesChange?.(aktifler);
     }
-  }, [aktifler, onStatusFilterChange]);
+  }, [aktifler, onStatusFilterChange, onSelectedStatusesChange]);
 
   // Arama terimlerini birleştir
   React.useEffect(() => {

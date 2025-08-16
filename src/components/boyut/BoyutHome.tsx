@@ -9,6 +9,7 @@ import ModelTable, { type ModelSummary } from "./ModelTable";
 
 import { fetchBoyutTree, fetchBoyutModels } from "@/services/boyutService";
 import { mapTreeApiToRow, mapModelApiToRow, type BoyutRowUI, type ModelSummaryUI } from "./normalize";
+import { usePageTitle } from "@/contexts/PageTitleContext";
 import { toStatusNumber } from "@/lib/status";
 
 // tarih kısayolu
@@ -16,9 +17,15 @@ const fmt = (iso?: string) => (iso ? new Date(iso).toLocaleDateString("tr-TR") :
 
 export default function BoyutHome() {
   const [search, setSearch] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState<"all" | "active" | "draft" | "passive">("all");
+  const [statusFilter, setStatusFilter] = React.useState<"all" | "active" | "draft" | "passive" | "multiple">("all");
   const [languageFilter, setLanguageFilter] = React.useState<string | "all" | "multiple">("all");
   const [selectedLanguages, setSelectedLanguages] = React.useState<string[]>([]);
+  const { setPageTitle } = usePageTitle();
+
+  // Sayfa başlığını ayarla
+  React.useEffect(() => {
+    setPageTitle('Boyutlar');
+  }, [setPageTitle]);
 
   const [rows, setRows] = React.useState<BoyutRow[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -224,7 +231,7 @@ function normalizeLang(s: string) {
      items: BoyutRowUI[],
      params: {
        search: string;
-       statusFilter: "all" | "active" | "draft" | "passive";
+       statusFilter: "all" | "active" | "draft" | "passive" | "multiple";
        languageFilter: string | "all" | "multiple";
        selectedLanguages: string[];
      }

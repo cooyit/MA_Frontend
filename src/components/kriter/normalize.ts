@@ -41,7 +41,7 @@ export function mapTreeApiToRow(api: KriterTreeApi): KriterRowUI {
     name: api.kriterAdi,
     shortName: api.kriterAlias,
     language: api.dilAdi,
-    status: api.aktif === "Aktif" ? 1 : api.aktif === "Taslak" ? 2 : 0,
+    status: (api.aktif ?? 0) as StatusNum,
     date: api.olusturmaZamani,
     translations: api.translations?.map(mapTranslationApiToUI),
   };
@@ -53,7 +53,7 @@ export function mapTranslationApiToUI(api: KriterTreeApi): KriterTranslationUI {
     name: api.kriterAdi,
     shortName: api.kriterAlias,
     language: api.dilAdi,
-    status: api.aktif === "Aktif" ? 1 : api.aktif === "Taslak" ? 2 : 0,
+    status: (api.aktif ?? 0) as StatusNum,
     date: api.olusturmaZamani,
   };
 }

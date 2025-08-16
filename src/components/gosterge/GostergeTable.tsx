@@ -9,7 +9,8 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { Eye, Edit, Power, Plus, Trash2, MoreHorizontal, Languages, Tag, ChevronDown, ChevronRight } from "lucide-react";
+import { FilterChips, type Chip } from "@/components/common/FilterChips";
+import { Eye, Edit, Power, Plus, Trash2, MoreHorizontal, Languages, Tag, ChevronDown, ChevronRight, ArrowUpDown } from "lucide-react";
 import type { StatusNum } from "@/lib/status";
 
 export type GostergeChild = {
@@ -59,8 +60,64 @@ type Props = {
 
 export default function GostergeTable({ rows, loading, onRowSelect, selectedRowKey, actions }: Props) {
   const [expandedKeys, setExpandedKeys] = React.useState<Set<string>>(new Set());
+  const [sortBy, setSortBy] = React.useState<string>("default");
 
-  const expandableRows = rows.filter(r => (r.children?.length ?? 0) > 0);
+  // DD.MM.YYYY formatındaki tarihi parse et
+  const parseTurkishDate = (dateStr: string): number => {
+    if (!dateStr) return 0;
+    
+    // DD.MM.YYYY formatını kontrol et
+    const match = dateStr.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (match) {
+      const [, day, month, year] = match;
+      // JavaScript'te ay 0-based olduğu için -1 yapıyoruz
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).getTime();
+    }
+    
+    // Eğer farklı format ise normal Date.parse dene
+    const parsed = new Date(dateStr).getTime();
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
+  // Sıralama etiketini al
+  const getSortLabel = (sortType: string) => {
+    switch (sortType) {
+      case "name-asc": return "İsme göre (A → Z)";
+      case "name-desc": return "İsme göre (Z → A)";
+      case "date-asc": return "Tarihe göre (En eski → En yeni)";
+      case "date-desc": return "Tarihe göre (En yeni → En eski)";
+      default: return "Varsayılan";
+    }
+  };
+
+  // Sıralama fonksiyonu
+  const sortedRows = React.useMemo(() => {
+    if (sortBy === "default") return rows;
+    
+    const sorted = [...rows];
+    switch (sortBy) {
+      case "name-asc":
+        return sorted.sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+      case "name-desc":
+        return sorted.sort((a, b) => b.name.localeCompare(a.name, 'tr'));
+      case "date-asc":
+        return sorted.sort((a, b) => {
+          const dateA = parseTurkishDate(a.date || '');
+          const dateB = parseTurkishDate(b.date || '');
+          return dateA - dateB;
+        });
+      case "date-desc":
+        return sorted.sort((a, b) => {
+          const dateA = parseTurkishDate(a.date || '');
+          const dateB = parseTurkishDate(b.date || '');
+          return dateB - dateA;
+        });
+      default:
+        return rows;
+    }
+  }, [rows, sortBy]);
+
+  const expandableRows = sortedRows.filter(r => (r.children?.length ?? 0) > 0);
   const allExpanded = expandableRows.length > 0 && expandedKeys.size === expandableRows.length;
 
   const expandAll = () => {
@@ -98,19 +155,62 @@ export default function GostergeTable({ rows, loading, onRowSelect, selectedRowK
     );
   }
 
+  // Sıralama chip'i
+  const sortChip: Chip | null = sortBy !== "default" ? {
+    id: `sort:${sortBy}`,
+    label: `Sıralama: ${getSortLabel(sortBy)}`,
+    onRemove: () => setSortBy("default")
+  } : null;
+
   return (
     <div className="space-y-2">
-      {expandableRows.length > 0 && (
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={allExpanded ? collapseAll : expandAll}
-          >
-            {allExpanded ? "Tümünü Kapat" : "Tümünü Aç"}
-          </Button>
-        </div>
+      {/* Sıralama Chip'i */}
+      {sortChip && (
+        <FilterChips chips={[sortChip]} />
       )}
+      
+      <div className="flex justify-between items-center">
+        {expandableRows.length > 0 && (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={allExpanded ? collapseAll : expandAll}
+            >
+              {allExpanded ? "Tümünü Kapat" : "Tümünü Aç"}
+            </Button>
+          </div>
+        )}
+        
+        {/* Sıralama Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <ArrowUpDown className="h-4 w-4" />
+              Sıralama
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuItem onClick={() => setSortBy("default")}>
+              Varsayılan
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setSortBy("name-asc")}>
+              İsme göre (A → Z)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSortBy("name-desc")}>
+              İsme göre (Z → A)
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setSortBy("date-desc")}>
+              Tarihe göre (En yeni → En eski)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setSortBy("date-asc")}>
+              Tarihe göre (En eski → En yeni)
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       
       <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
         <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: '400px' }}>
@@ -144,7 +244,7 @@ export default function GostergeTable({ rows, loading, onRowSelect, selectedRowK
               </tr>
             </thead>
             <tbody className="divide-y">
-              {rows.map((row, index) => {
+              {sortedRows.map((row, index) => {
                 const rowKey = `root-${row.id}`;
                 const canExpand = (row.children?.length ?? 0) > 0;
                 const isExpanded = expandedKeys.has(rowKey);

@@ -8,7 +8,7 @@ export type StatusNum = 0 | 1 | 2;
 export type StatusStr = "Pasif" | "Aktif" | "Taslak";
 
 /** Liste/filtre kontrollerinde kullanılan değerler */
-export type StatusFilter = "all" | "active" | "draft" | "passive";
+export type StatusFilter = "all" | "active" | "draft" | "passive" | "multiple";
 
 /** Objeden aktif/Aktif/durum alanını okuyup normalize eder */
 export function getStatus(obj: Record<string, any>): StatusNum {

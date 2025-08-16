@@ -9,15 +9,23 @@ import KriterModelTable, { type KriterModelSummary } from "./KriterModelTable";
 import { fetchKriterTree, fetchKriterModels, fetchKriterNavigation } from "@/services/kriterService";
 import { mapTreeApiToRow, mapModelApiToRow, type KriterRowUI, type KriterModelUI } from "./normalize";
 import { toStatusNumber } from "@/lib/status";
+import { usePageTitle } from "@/contexts/PageTitleContext";
 
 // tarih kısayolu
 const fmt = (iso?: string) => (iso ? new Date(iso).toLocaleDateString("tr-TR") : "");
 
 export default function KriterHome() {
   const [search, setSearch] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState<"all" | "active" | "draft" | "passive">("all");
+  const [statusFilter, setStatusFilter] = React.useState<"all" | "active" | "draft" | "passive" | "multiple">("all");
+  const [selectedStatuses, setSelectedStatuses] = React.useState<number[]>([]);
   const [languageFilter, setLanguageFilter] = React.useState<string | "all" | "multiple">("all");
   const [selectedLanguages, setSelectedLanguages] = React.useState<string[]>([]);
+  const { setPageTitle } = usePageTitle();
+
+  // Sayfa başlığını ayarla
+  React.useEffect(() => {
+    setPageTitle('Kriterler');
+  }, [setPageTitle]);
 
   const [rows, setRows] = React.useState<KriterRow[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -46,7 +54,7 @@ export default function KriterHome() {
     fetchKriterTree(ctrl.signal)
       .then((data) => {
         const mapped = data.map(mapTreeApiToRow) as KriterRowUI[];
-        const filtered = applyFilters(mapped, { search, statusFilter, languageFilter, selectedLanguages });
+        const filtered = applyFilters(mapped, { search, statusFilter, selectedStatuses, languageFilter, selectedLanguages });
         const final = filtered.map((r) => ({
           ...r,
           date: fmt(r.date),
@@ -61,7 +69,7 @@ export default function KriterHome() {
       .finally(() => setLoading(false));
 
     return () => ctrl.abort();
-  }, [search, statusFilter, languageFilter, selectedLanguages]);
+  }, [search, statusFilter, selectedStatuses, languageFilter, selectedLanguages]);
 
   // Modeller yükle
   React.useEffect(() => {
@@ -140,6 +148,7 @@ export default function KriterHome() {
         onSearchChange={setSearch}
         statusFilter={statusFilter}
         onStatusFilterChange={setStatusFilter}
+        onSelectedStatusesChange={setSelectedStatuses}
         languageFilter={languageFilter}
         onLanguageFilterChange={setLanguageFilter}
         selectedLanguages={selectedLanguages}
@@ -217,15 +226,17 @@ function applyFilters(
   items: KriterRowUI[],
   params: {
     search: string;
-    statusFilter: "all" | "active" | "draft" | "passive";
+    statusFilter: "all" | "active" | "draft" | "passive" | "multiple";
+    selectedStatuses: number[];
     languageFilter: string | "all" | "multiple";
     selectedLanguages: string[];
   }
 ) {
-  const { search, statusFilter, languageFilter, selectedLanguages } = params;
+  const { search, statusFilter, selectedStatuses, languageFilter, selectedLanguages } = params;
   const q = search.trim().toLowerCase();
 
-  const projected: KriterRowUI[] =
+  // Önce language filtrelemesi yap
+  const languageFiltered: KriterRowUI[] =
     languageFilter === "all"
       ? items
       : languageFilter === "multiple"
@@ -286,14 +297,63 @@ function applyFilters(
           return [];
         });
 
-  return projected.filter((r) => {
+  // Sonra status filtrelemesi yap - child kayıtları da root kayıt gibi göster
+  return languageFiltered.flatMap((r) => {
     const matchesSearch =
       !q || r.name.toLowerCase().includes(q) || r.shortName.toLowerCase().includes(q);
 
-    const matchesStatus =
-      statusFilter === "all" ||
-      toStatusNumber(r.status) === (statusFilter === "active" ? 1 : statusFilter === "draft" ? 2 : 0);
+    const results: KriterRowUI[] = [];
 
-    return matchesSearch && matchesStatus;
+    // Status filtrelemesi için statusFilter'ı parse et
+    let statusesToCheck: number[] = [];
+    if (statusFilter === "all") {
+      statusesToCheck = [0, 1, 2]; // Pasif, Aktif, Taslak
+    } else if (statusFilter === "multiple") {
+      statusesToCheck = selectedStatuses;
+    } else if (statusFilter === "active") {
+      statusesToCheck = [1];
+    } else if (statusFilter === "draft") {
+      statusesToCheck = [2];
+    } else if (statusFilter === "passive") {
+      statusesToCheck = [0];
+    }
+
+    // Root kayıt status kontrolü
+    const rootStatus = toStatusNumber(r.status);
+    const rootMatchesStatus = statusesToCheck.includes(rootStatus);
+
+    // Root kayıt eşleşiyorsa ekle (child'ları ile birlikte)
+    if (matchesSearch && rootMatchesStatus) {
+      // Root kayıt eşleşiyorsa, child'ları da filtrele
+      const filteredChildren = r.translations?.filter(child => {
+        const childStatus = toStatusNumber(child.status);
+        return statusesToCheck.includes(childStatus);
+      }) || [];
+      
+      results.push({
+        ...r,
+        translations: filteredChildren
+      });
+    }
+
+    // Child kayıtları ayrı root kayıt gibi ekle (sadece root eşleşmiyorsa)
+    if (matchesSearch && !rootMatchesStatus && r.translations) {
+      r.translations.forEach(child => {
+        const childStatus = toStatusNumber(child.status);
+        if (statusesToCheck.includes(childStatus)) {
+          results.push({
+            id: child.id,
+            name: child.name,
+            shortName: child.shortName,
+            language: child.language,
+            status: child.status,
+            date: child.date || "",
+            translations: [], // Child'ı root yaptığımız için translations'ı boş bırak
+          });
+        }
+      });
+    }
+
+    return results;
   });
 }

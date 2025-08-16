@@ -7,6 +7,7 @@ export interface GostergeTreeApi {
   gostergeAdi: string;
   gostergeAllias: string;
   dilAdi: string;
+  aktif: number | null;
   olusturmaZamani: string;
   cevapTuruAdlari: string[];
   children: GostergeTreeApi[];
