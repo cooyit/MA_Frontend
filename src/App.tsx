@@ -5,6 +5,8 @@ import { Dashboard } from "./pages/dashboard/Dashboard"
 import Eslesme from "./pages/eslesme/Eslesme" 
 import BoyutHome from "@/components/boyut/BoyutHome";
 import KriterHome from "@/components/kriter/KriterHome";
+import GostergeHome from "@/components/gosterge/GostergeHome";
+import ModelHome from "@/components/model/ModelHome";
 
 function App() {
   return (
@@ -14,7 +16,8 @@ function App() {
         <Route path="/eslesme" element={<Eslesme />} /> {/* ✅ burası eklendi */}
         <Route path="/boyutlar" element={<BoyutHome />} />
         <Route path="/kriterler" element={<KriterHome />} />
-        <Route path="/gostergeler" element={<div className="p-6">Göstergeler sayfası yakında...</div>} />
+        <Route path="/gostergeler" element={<GostergeHome />} />
+        <Route path="/modeller" element={<ModelHome />} />
         <Route path="/diller" element={<div className="p-6">Diller sayfası yakında...</div>} />
         <Route path="/ulkeler" element={<div className="p-6">Ülkeler sayfası yakında...</div>} />
         <Route path="/sehirler" element={<div className="p-6">Şehirler sayfası yakında...</div>} />

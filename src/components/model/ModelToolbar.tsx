@@ -1,4 +1,4 @@
-//src/components/kriter/KriterToolbar.tsx
+//src/components/model/ModelToolbar.tsx
 "use client";
 
 import * as React from "react";
@@ -7,8 +7,9 @@ import { SmartTextSearch } from "@/components/eslesme/SmartTextSearch";
 import { DilMultiSelect } from "@/components/common/DilMultiSelect";
 import { DurumMultiSelect, type Durum } from "@/components/common/DurumMultiSelect";
 import { FilterChips, type Chip } from "@/components/common/FilterChips";
-import { RefreshCw, X, Plus } from "lucide-react";
+import { RefreshCw, X, Plus, Menu, Globe } from "lucide-react";
 import type { StatusFilter } from "@/lib/status";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   search: string;
@@ -24,7 +25,7 @@ type Props = {
   hints?: string[];
 };
 
-export default function KriterToolbar({
+export default function ModelToolbar({
   search,
   onSearchChange,
   statusFilter,
@@ -37,6 +38,8 @@ export default function KriterToolbar({
   onRefresh,
   hints = [],
 }: Props) {
+  const navigate = useNavigate();
+  
   // Çoklu kelime arama için state'ler
   const [searchInput, setSearchInput] = React.useState("");
   const [searchTerms, setSearchTerms] = React.useState<string[]>([]);
@@ -120,7 +123,7 @@ export default function KriterToolbar({
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-semibold text-foreground">Kriterler</h2>
+            <h2 className="text-xl font-semibold text-foreground">Modeller</h2>
             <div className="flex items-center gap-2">
               {chips.length > 0 && (
                 <span className="text-sm text-muted-foreground">
@@ -129,10 +132,25 @@ export default function KriterToolbar({
               )}
             </div>
           </div>
-          <Button onClick={onCreate} size="sm" className="bg-primary hover:bg-primary/90">
-            <Plus className="mr-2 h-4 w-4" />
-            Yeni Kriter
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate("/eslesme")}
+              className="bg-secondary hover:bg-secondary/80"
+            >
+              <Menu className="mr-2 h-4 w-4" />
+              Model Navigasyonu
+            </Button>
+            <Button variant="outline" size="sm">
+              <Globe className="mr-2 h-4 w-4" />
+              Model Ülke
+            </Button>
+            <Button onClick={onCreate} size="sm" className="bg-primary hover:bg-primary/90">
+              <Plus className="mr-2 h-4 w-4" />
+              + Yeni Model
+            </Button>
+          </div>
         </div>
 
         {/* Search & Filters Row */}
@@ -151,7 +169,7 @@ export default function KriterToolbar({
                 value={searchInput}
                 onChange={setSearchInput}
                 hints={hints}
-                placeholder="Kriter ara..."
+                placeholder="Model adı, model kısa adı veya model etiketleri ara..."
                 minChars={1}
                 onPick={(v) => addSearchTerm(v)}
               />

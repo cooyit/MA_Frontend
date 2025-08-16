@@ -67,6 +67,6 @@ export function mapModelApiToRow(api: KriterModelApi): KriterModelUI {
     kriterWeight: api.kriterAgirligi || 0,
     modelWeight: api.kriterModelAgirligi || 0,
     gostergeSayisi: api.gostergeSayisi || 0,
-    seviye: api.seviyeAdi || "Boyut-Gösterge Hiyerarşisi",
+    seviye: api.seviyeAdi || "Puanlı",
   };
 }

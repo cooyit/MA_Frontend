@@ -1,4 +1,4 @@
-//src/components/kriter/KriterToolbar.tsx
+//src/components/gosterge/GostergeToolbar.tsx
 "use client";
 
 import * as React from "react";
@@ -24,7 +24,7 @@ type Props = {
   hints?: string[];
 };
 
-export default function KriterToolbar({
+export default function GostergeToolbar({
   search,
   onSearchChange,
   statusFilter,
@@ -120,7 +120,7 @@ export default function KriterToolbar({
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-semibold text-foreground">Kriterler</h2>
+            <h2 className="text-xl font-semibold text-foreground">Göstergeler</h2>
             <div className="flex items-center gap-2">
               {chips.length > 0 && (
                 <span className="text-sm text-muted-foreground">
@@ -131,7 +131,7 @@ export default function KriterToolbar({
           </div>
           <Button onClick={onCreate} size="sm" className="bg-primary hover:bg-primary/90">
             <Plus className="mr-2 h-4 w-4" />
-            Yeni Kriter
+            Yeni Gösterge
           </Button>
         </div>
 
@@ -151,7 +151,7 @@ export default function KriterToolbar({
                 value={searchInput}
                 onChange={setSearchInput}
                 hints={hints}
-                placeholder="Kriter ara..."
+                placeholder="Gösterge ara..."
                 minChars={1}
                 onPick={(v) => addSearchTerm(v)}
               />
