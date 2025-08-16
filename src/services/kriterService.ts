@@ -61,8 +61,9 @@ export function fetchKriterModels(kriterId: number, signal?: AbortSignal) {
   return http<KriterModelApi[]>(`/api/Kriterler/${kriterId}/models`, { signal });
 }
 
+
 // Eşleşmeler servisinden navigasyon verisi çek
-export function fetchKriterNavigation(kriterId: number, signal?: AbortSignal) {
+export function fetchKriterNavigation(_kriterId: number, signal?: AbortSignal) {
   return http<KriterNavigationApi[]>("/api/Eslesme/navigation", { 
     signal,
     method: "GET",
