@@ -26,13 +26,9 @@ type Props = {
 };
 
 export default function ModelToolbar({
-  search,
   onSearchChange,
-  statusFilter,
   onStatusFilterChange,
-  languageFilter,
   onLanguageFilterChange,
-  selectedLanguages = [],
   onSelectedLanguagesChange,
   onCreate,
   onRefresh,

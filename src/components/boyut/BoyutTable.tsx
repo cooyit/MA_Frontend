@@ -144,7 +144,7 @@ function TranslationRows({
 }) {
   return (
     <div className="space-y-1">
-      {items.map((t, idx) => (
+      {items.map((t) => (
                          <div
           key={`trans-${parent.id}-${t.id}`}
           className={`grid grid-cols-12 items-center gap-2 rounded-md border border-border/50 px-3 py-2 cursor-pointer hover:bg-muted/50 ${

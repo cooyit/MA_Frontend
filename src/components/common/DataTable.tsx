@@ -53,6 +53,8 @@ export interface DataTableProps<T> {
     expandedRowKeys?: string[];
     /** Genişleyen satırlar değiştiğinde */
     onExpandChange?: (expandedKeys: string[], toggledRecord?: T) => void;
+    /** Child row'ları ayrı tablo satırları olarak render et */
+    renderAsSeparateRows?: boolean;
   };
   actions?: {
     items: ActionItem<T>[];
@@ -204,14 +206,14 @@ export function DataTable<T>({
             </tr>
           </thead>
 
-          <tbody className="divide-y">
+                    <tbody className="divide-y">
             {data.map((record, index) => {
               const key = getRowKey(record, index);
               const canExpand = !!expandable && expandable.rowExpandable?.(record) !== false;
               const isExpanded = canExpand && expandedRows.has(key);
               const panelId = `dt-panel-${key}`;
 
-                                           const isSelected = selectedRowKey === key;
+              const isSelected = selectedRowKey === key;
               const baseRow =
                 "transition-colors " +
                 (isSelected ? "bg-primary/10 border-l-4 border-primary" : "") +
@@ -220,12 +222,12 @@ export function DataTable<T>({
 
               return (
                 <React.Fragment key={key}>
-                                     <tr
-                     className={baseRow}
-                     onClick={onRowClick ? () => onRowClick(record) : undefined}
-                   >
-                                         {expandable && (
-                       <td className="px-4 py-2">
+                  <tr
+                    className={baseRow}
+                    onClick={onRowClick ? () => onRowClick(record) : undefined}
+                  >
+                    {expandable && (
+                      <td className="px-4 py-2">
                         {canExpand ? (
                           <button
                             type="button"
@@ -253,8 +255,8 @@ export function DataTable<T>({
                       return (
                         <td
                           key={String(column.key)}
-                                                     className={cn(
-                             "px-4 py-2 whitespace-nowrap",
+                          className={cn(
+                            "px-4 py-2 whitespace-nowrap",
                             column.cellClassName,
                             {
                               "text-left": (column.align ?? "left") === "left",
@@ -268,8 +270,8 @@ export function DataTable<T>({
                       );
                     })}
 
-                                         {actions && (
-                       <td className="px-4 py-2">
+                    {actions && (
+                      <td className="px-4 py-2">
                         <DropdownMenu>
                           <DropdownMenuTrigger
                             asChild
@@ -321,14 +323,32 @@ export function DataTable<T>({
                     )}
                   </tr>
 
-                  {expandable && isExpanded && (
+                  {/* Expanded content - render as separate table rows for better alignment */}
+                  {expandable && isExpanded && expandable.renderAsSeparateRows && (
                     <tr className="bg-muted/40">
-                                             <td
-                         id={panelId}
-                         colSpan={columns.length + (expandable ? 1 : 0) + (actions ? 1 : 0)}
-                         className="px-4 py-2"
-                       >
-                        {expandable.expandedRowRender(record)}
+                      <td
+                        id={panelId}
+                        colSpan={columns.length + (expandable ? 1 : 0) + (actions ? 1 : 0)}
+                        className="px-4 py-2"
+                      >
+                        <div className="space-y-1">
+                          {expandable.expandedRowRender(record)}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  
+                  {/* Legacy expanded content - single colSpan cell */}
+                  {expandable && isExpanded && !expandable.renderAsSeparateRows && (
+                    <tr className="bg-muted/40">
+                      <td
+                        id={panelId}
+                        colSpan={columns.length + (expandable ? 1 : 0) + (actions ? 1 : 0)}
+                        className="px-4 py-2"
+                      >
+                        <div className="space-y-1">
+                          {expandable.expandedRowRender(record)}
+                        </div>
                       </td>
                     </tr>
                   )}

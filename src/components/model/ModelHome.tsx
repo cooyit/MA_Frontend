@@ -6,7 +6,7 @@ import * as React from "react";
 import ModelToolbar from "./ModelToolbar";
 import ModelTable, { type ModelRow, type ModelChild } from "./ModelTable";
 import ModelDetailTable, { type ModelDetailSummary } from "./ModelDetailTable";
-import { fetchModels, fetchModelDetails, type ModelDetailApi } from "@/services/modelService";
+import { fetchModels, fetchModelDetails } from "@/services/modelService";
 import { mapApiToRow, type ModelRowUI } from "./normalize";
 import { toStatusNumber } from "@/lib/status";
 
@@ -76,7 +76,7 @@ export default function ModelHome() {
     
     const ctrl = new AbortController();
     
-    fetchModelDetails(modelId, ctrl.signal)
+    fetchModelDetails(Number(modelId), ctrl.signal)
       .then((data) => {
         const mappedDetails: ModelDetailSummary[] = data.map((item) => ({
           id: item.modelId,

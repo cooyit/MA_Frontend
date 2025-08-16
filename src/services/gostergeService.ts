@@ -69,7 +69,7 @@ export function fetchGostergeModels(gostergeId: number, signal?: AbortSignal) {
 }
 
 // Eşleşmeler servisinden navigasyon verisi çek
-export function fetchGostergeNavigation(gostergeId: number, signal?: AbortSignal) {
+export function fetchGostergeNavigation(_gostergeId: number, signal?: AbortSignal) {
   return http<GostergeNavigationApi[]>("/api/Eslesme/navigation", { 
     signal,
     method: "GET",

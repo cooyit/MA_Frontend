@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { SmartTextSearch } from "@/components/eslesme/SmartTextSearch";
 import { DilMultiSelect } from "@/components/common/DilMultiSelect";
 import { DurumMultiSelect, type Durum } from "@/components/common/DurumMultiSelect";
@@ -26,13 +26,9 @@ type Props = {
 };
 
 export default function BoyutToolbar({
-  search,
   onSearchChange,
-  statusFilter,
   onStatusFilterChange,
-  languageFilter,
   onLanguageFilterChange,
-  selectedLanguages = [],
   onSelectedLanguagesChange,
   onCreate,
   onRefresh,

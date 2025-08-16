@@ -117,13 +117,9 @@ export default function GostergeHome() {
     <div className="min-h-screen bg-background">
       {/* Modern Toolbar */}
       <GostergeToolbar
-        search={search}
         onSearchChange={setSearch}
-        statusFilter={statusFilter}
         onStatusFilterChange={setStatusFilter}
-        languageFilter={languageFilter}
         onLanguageFilterChange={setLanguageFilter}
-        selectedLanguages={selectedLanguages}
         onSelectedLanguagesChange={setSelectedLanguages}
         onCreate={() => console.log("create")}
         onRefresh={() => {

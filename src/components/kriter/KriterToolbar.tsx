@@ -25,13 +25,9 @@ type Props = {
 };
 
 export default function KriterToolbar({
-  search,
   onSearchChange,
-  statusFilter,
   onStatusFilterChange,
-  languageFilter,
   onLanguageFilterChange,
-  selectedLanguages = [],
   onSelectedLanguagesChange,
   onCreate,
   onRefresh,

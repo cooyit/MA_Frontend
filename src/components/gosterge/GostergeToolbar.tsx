@@ -11,13 +11,9 @@ import { RefreshCw, X, Plus } from "lucide-react";
 import type { StatusFilter } from "@/lib/status";
 
 type Props = {
-  search: string;
   onSearchChange: (v: string) => void;
-  statusFilter: StatusFilter;
   onStatusFilterChange: (v: StatusFilter) => void;
-  languageFilter: string | "all";
   onLanguageFilterChange: (v: string | "all") => void;
-  selectedLanguages?: string[];
   onSelectedLanguagesChange?: (languages: string[]) => void;
   onCreate: () => void;
   onRefresh?: () => void;
@@ -25,13 +21,9 @@ type Props = {
 };
 
 export default function GostergeToolbar({
-  search,
   onSearchChange,
-  statusFilter,
   onStatusFilterChange,
-  languageFilter,
   onLanguageFilterChange,
-  selectedLanguages = [],
   onSelectedLanguagesChange,
   onCreate,
   onRefresh,
